@@ -77,7 +77,6 @@ trigger:
   to: 'on'
 condition: []
 action:
-<<<<<<< HEAD
 - choose:
   - conditions:
     - condition: state
@@ -135,7 +134,7 @@ action:
   - service: switch.turn_off
     target:
       entity_id: !input fan_entity
-=======
+
 - choose:
   - conditions:
     - condition: state
@@ -186,5 +185,3 @@ action:
   - service: switch.turn_off
     target:
       entity_id: !input fan_entity
-
->>>>>>> 21533356dd59d256a876eb313ef654cdbaab4272
