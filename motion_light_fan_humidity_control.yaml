@@ -1,115 +1,129 @@
 blueprint:
   name: Motion, Light, and Fan Control with Humidity Threshold
-  description: Automates light and fan based on motion, door status, and humidity levels.
+  description: Automates light and fan based on motion, door status, and humidity
+    levels.
   domain: automation
   input:
     motion_sensor:
       name: Motion Sensor
       selector:
         entity:
-          domain: binary_sensor
-          device_class: motion
+          domain:
+          - binary_sensor
+          device_class:
+          - motion
+          multiple: false
     door_sensor:
       name: Door Sensor
       selector:
         entity:
-          domain: binary_sensor
-          device_class: door
+          domain:
+          - binary_sensor
+          device_class:
+          - door
+          multiple: false
     humidity_sensor:
       name: Humidity Sensor
       selector:
         entity:
-          domain: sensor
-          device_class: humidity
+          domain:
+          - sensor
+          device_class:
+          - humidity
+          multiple: false
     light_entity:
       name: Smart Light
       selector:
         entity:
-          domain: light
+          domain:
+          - light
+          multiple: false
     fan_entity:
       name: Smart Exhaust Fan
       selector:
         entity:
-          domain: switch
+          domain:
+          - switch
+          multiple: false
     humidity_threshold:
       name: Humidity Threshold
       description: Humidity level to act upon.
       default: 60
       selector:
         number:
-          min: 0
-          max: 100
-          unit_of_measurement: "%"
+          min: 0.0
+          max: 100.0
+          unit_of_measurement: '%'
           mode: slider
+          step: 1.0
     delay_timer:
       name: Delay Timer
       description: Delay before turning off devices (in seconds).
       default: 60
       selector:
         number:
-          min: 1
-          max: 300
-          unit_of_measurement: "seconds"
+          min: 1.0
+          max: 300.0
+          unit_of_measurement: seconds
           mode: slider
-
+          step: 1.0
+  source_url: https://github.com/carlosCastro99/bathBlueprint/blob/b16270b82b9c92623f766ab47a02668149adf35e/motion_light_fan_humidity_control.yaml
 trigger:
-  - platform: state
-    entity_id: !input 'door_sensor'
-    to: 'off'
-  - platform: state
-    entity_id: !input 'motion_sensor'
-    to: 'on'
-
+- platform: state
+  entity_id: !input door_sensor
+  to: 'off'
+- platform: state
+  entity_id: !input motion_sensor
+  to: 'on'
 condition: []
-
 action:
-  - choose:
-      - conditions:
-          - condition: state
-            entity_id: !input 'door_sensor'
-            state: 'off'
-          - condition: state
-            entity_id: !input 'motion_sensor'
-            state: 'on'
-        sequence:
-          - service: light.turn_on
-            target:
-              entity_id: !input 'light_entity'
-          - service: switch.turn_on
-            target:
-              entity_id: !input 'fan_entity'
-      - conditions:
-          - condition: template
-            value_template: "{{ states('sensor.humidity_sensor') | float < states('input_number.humidity_threshold') | float }}"
-          - condition: state
-            entity_id: !input 'door_sensor'
-            state: 'on'
-        sequence:
-          - delay: 
-              seconds: "{{ states('input_number.delay_timer') | int }}"
-          - service: light.turn_off
-            target:
-              entity_id: !input 'light_entity'
-          - service: switch.turn_off
-            target:
-              entity_id: !input 'fan_entity'
-      - conditions:
-          - condition: numeric_state
-            entity_id: !input 'humidity_sensor'
-            above: "{{ states('input_number.humidity_threshold') | int }}"
-          - condition: state
-            entity_id: !input 'door_sensor'
-            state: 'on'
-        sequence:
-          - service: light.turn_off
-            target:
-              entity_id: !input 'light_entity'
-    default:
-      - wait_for_trigger:
-          - platform: numeric_state
-            entity_id: !input 'humidity_sensor'
-            below: "{{ states('input_number.humidity_threshold') | float }}"
-        continue_on_timeout: false
-      - service: switch.turn_off
-        target:
-          entity_id: !input 'fan_entity'
+- choose:
+  - conditions:
+    - condition: state
+      entity_id: !input door_sensor
+      state: 'off'
+    - condition: state
+      entity_id: !input motion_sensor
+      state: 'on'
+    sequence:
+    - service: light.turn_on
+      target:
+        entity_id: !input light_entity
+    - service: switch.turn_on
+      target:
+        entity_id: !input fan_entity
+  - conditions:
+    - condition: template
+      value_template: "{{ states('sensor.humidity_sensor') | float < states('input_number.humidity_threshold') | float }}"
+    - condition: state
+      entity_id: !input door_sensor
+      state: 'on'
+    sequence:
+    - delay:
+        seconds: "{{ states('input_number.delay_timer') | int }}"
+    - service: light.turn_off
+      target:
+        entity_id: !input light_entity
+    - service: switch.turn_off
+      target:
+        entity_id: !input fan_entity
+  - conditions:
+    - condition: numeric_state
+      entity_id: !input humidity_sensor
+      above: input_number.humidity_threshold
+    - condition: state
+      entity_id: !input door_sensor
+      state: 'on'
+    sequence:
+    - service: light.turn_off
+      target:
+        entity_id: !input light_entity
+  default:
+  - wait_for_trigger:
+    - platform: numeric_state
+      entity_id: !input humidity_sensor
+      below: input_number.humidity_threshold
+    continue_on_timeout: false
+  - service: switch.turn_off
+    target:
+      entity_id: !input fan_entity
