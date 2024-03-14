@@ -1,8 +1,9 @@
 blueprint:
   name: Motion, Light, and Fan Control with Humidity Threshold
   description: >
-   # 🚿 Bathroom Humidity Exhaust Fan    
-  **Version: 0.001**
+    # 🚿 Bathroom Humidity Exhaust Fan
+    
+    **Version: 2.3**
   domain: automation
   input:
     motion_sensor:
