@@ -96,7 +96,7 @@ action:
       - conditions:
           - condition: numeric_state
             entity_id: !input 'humidity_sensor'
-            above: "{{ states('input_number.humidity_threshold') | float }}"
+            above: "{{ states('input_number.humidity_threshold') | int }}"
           - condition: state
             entity_id: !input 'door_sensor'
             state: 'on'
