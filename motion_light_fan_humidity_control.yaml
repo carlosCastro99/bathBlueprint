@@ -3,7 +3,7 @@ blueprint:
   description: >
     # 🚿 Bathroom Humidity Exhaust Fan
     
-    **Version: 0.1**
+    **Version: 0.1.1**
   domain: automation
   input:
     motion_sensor:
@@ -73,10 +73,8 @@ blueprint:
 trigger:
 - platform: state
   entity_id: !input door_sensor
-  to: 'off'
 - platform: state
   entity_id: !input motion_sensor
-  to: 'on'
 condition: []
 action:
 - choose:
