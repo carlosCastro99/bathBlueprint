@@ -74,7 +74,7 @@ blueprint:
       description: "The maximum amount of time (in minutes) the fan should run before automatically turning off, regardless of humidity."
       default: 30
 
-  source_url: https://raw.githubusercontent.com/carlosCastro99/bathBlueprint/main/motion_light_fan_humidity_control.yaml
+  source_url: https://github.com/carlosCastro99/bathBlueprint/blob/main/motion_light_fan_humidity_control.yaml
 trigger:
 - platform: state
   entity_id: !input door_sensor
