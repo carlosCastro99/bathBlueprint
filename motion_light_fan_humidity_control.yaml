@@ -89,7 +89,7 @@ trigger:
 - platform: state
   entity_id: binary_sensor.status_wc_piso1_high_humidity
 condition: []
-#Motion on = Light ON  
+
 action:
 - choose:
   - conditions:
