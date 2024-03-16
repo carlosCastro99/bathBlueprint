@@ -75,6 +75,9 @@ trigger:
   entity_id: !input door_sensor
 - platform: state
   entity_id: !input motion_sensor
+- platform:  numeric_state
+  entity_id: !input humidity_sensor
+  above: input_number.humidity_threshold
 condition: []
 action:
 - choose:
@@ -131,7 +134,7 @@ action:
     - platform: numeric_state
       entity_id: !input humidity_sensor
       below: input_number.humidity_threshold
-    continue_on_timeout: false
+    continue_on_timeout: true
   - service: switch.turn_off
     target:
       entity_id: !input fan_entity
