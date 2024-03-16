@@ -83,9 +83,9 @@ trigger:
   entity_id: !input motion_sensor
   from: 'off'
   to: 'on'
-- platform:  numeric_state
-  entity_id: !input humidity_sensor
-  above: input_number.humidity_threshold
+#- platform:  numeric_state
+#  entity_id: !input humidity_sensor
+#  above: input_number.humidity_threshold
 - platform: state
   entity_id: binary_sensor.status_wc_piso1_high_humidity
 condition: []
