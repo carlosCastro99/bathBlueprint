@@ -3,7 +3,7 @@ blueprint:
   description: >
     # 🚿 Bathroom Humidity Exhaust Fan
     
-    **Version: 0.1.1**
+    **Version: 0.1.2**
   domain: automation
   input:
     motion_sensor:
