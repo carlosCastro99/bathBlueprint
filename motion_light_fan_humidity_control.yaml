@@ -69,19 +69,42 @@ blueprint:
           unit_of_measurement: seconds
           mode: slider
           step: 1.0
-  source_url: https://github.com/carlosCastro99/bathBlueprint/blob/b16270b82b9c92623f766ab47a02668149adf35e/motion_light_fan_humidity_control.yaml
+    max_fan_runtime:
+      name: Maximum Fan Runtime
+      description: "The maximum amount of time (in minutes) the fan should run before automatically turning off, regardless of humidity."
+      default: 30
+
+  source_url: https://github.com/carlosCastro99/bathBlueprint/blob/main/motion_light_fan_humidity_control.yaml
 trigger:
 - platform: state
   entity_id: !input door_sensor
+  to: 'off'
 - platform: state
   entity_id: !input motion_sensor
+  from: 'off'
+  to: 'on'
 - platform:  numeric_state
   entity_id: !input humidity_sensor
   above: input_number.humidity_threshold
+- platform: state
+  entity_id: binary_sensor.status_wc_piso1_high_humidity
 condition: []
 action:
 - choose:
+#Motion on = Light ON  
   - conditions:
+    - condition: state
+      entity_id: !input motion_sensor
+      state: 'on'
+    sequence:
+    - service: light.turn_on
+      target:
+        entity_id: !input light_entity
+#humidity ON + DOOR Closed + Motion on = Light ON
+  - conditions:
+    - condition: state
+      entity_id: binary_sensor.status_wc_piso1_high_humidity
+      state: 'on'  
     - condition: state
       entity_id: !input door_sensor
       state: 'off'
@@ -95,7 +118,14 @@ action:
     - service: switch.turn_on
       target:
         entity_id: !input fan_entity
+#humidity ON + DOOR Open + Motion on = Light ON + Fan ON
   - conditions:
+    - condition: state
+      entity_id: binary_sensor.status_wc_piso1_high_humidity
+      state: 'on'  
+    - condition: state
+      entity_id: !input door_sensor
+      state: 'on'
     - condition: state
       entity_id: !input motion_sensor
       state: 'on'
@@ -103,38 +133,51 @@ action:
     - service: light.turn_on
       target:
         entity_id: !input light_entity
+    - service: switch.turn_on
+      target:
+        entity_id: !input fan_entity        
+#humidity OFF + DOOR OPEN + Motion off = Light off  + FAN Off      
   - conditions:
-    - condition: template
-      value_template: "{{ states('sensor.humidity_sensor') | float < states('input_number.humidity_threshold') | float }}"
+    - condition: state
+      entity_id: binary_sensor.status_wc_piso1_high_humidity
+      state: 'off'
     - condition: state
       entity_id: !input door_sensor
       state: 'on'
+    - condition: state
+      entity_id: !input motion_sensor
+      state: 'off'
     sequence:
-    - delay:
-        seconds: "{{ states('input_number.delay_timer') | int }}"
     - service: light.turn_off
       target:
-        entity_id: !input light_entity
+        entity_id: !input light_entity    
+    - delay:
+        seconds: "{{ states('input_number.delay_timer') | int }}"
     - service: switch.turn_off
       target:
         entity_id: !input fan_entity
+#humidity ON + DOOR OPEN + Motion off = Light off
   - conditions:
-    - condition: numeric_state
-      entity_id: !input humidity_sensor
-      above: input_number.humidity_threshold
+    - condition: state
+      entity_id: binary_sensor.status_wc_piso1_high_humidity
+      state: 'on'
     - condition: state
       entity_id: !input door_sensor
       state: 'on'
+    - condition: state
+      entity_id: !input motion_sensor
+      state: 'off'
+      #desliga a luz apenas
     sequence:
     - service: light.turn_off
       target:
         entity_id: !input light_entity
   default:
-  - wait_for_trigger:
-    - platform: numeric_state
-      entity_id: !input humidity_sensor
-      below: input_number.humidity_threshold
-    continue_on_timeout: true
-  - service: switch.turn_off
-    target:
-      entity_id: !input fan_entity
+    - delay:
+        minutes: !input 'max_fan_runtime'
+    - service: fan.turn_off
+      target:
+        entity_id: !input fan_entity 
+   - service: light.turn_off
+     target:
+        entity_id: !input light_entity
