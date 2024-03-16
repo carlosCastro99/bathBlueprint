@@ -126,6 +126,21 @@ action:
     - service: switch.turn_on
       target:
         entity_id: !input fan_entity
+#humidity ON + DOOR Closed + Motion on = Light ON
+  - conditions:
+    - condition: state
+      entity_id: binary_sensor.status_wc_piso1_high_humidity
+      state: 'off'  
+    - condition: state
+      entity_id: !input door_sensor
+      state: 'on'
+    - condition: state
+      entity_id: !input motion_sensor
+      state: 'on'
+    sequence:
+    - service: light.turn_on
+      target:
+        entity_id: !input light_entity      
 #humidity ON + DOOR Open + Motion on = Light ON + Fan ON
   - conditions:
     - condition: state
@@ -155,18 +170,41 @@ action:
     - condition: state
       entity_id: !input motion_sensor
       state: 'off'
-    sequence:
-    - service: light.turn_off
-      target:
-        entity_id: !input light_entity    
+    sequence:  
     - delay:
         hours: 0
         minutes: 0
         seconds: !input delay_timer
         milliseconds: 0    
+    - service: light.turn_off
+      target:
+        entity_id: !input light_entity  
     - service: switch.turn_off
       target:
         entity_id: !input fan_entity
+#humidity OFF + DOOR CLOSED + Motion on = Light on  + FAN Off      
+  - conditions:
+    - condition: state
+      entity_id: binary_sensor.status_wc_piso1_high_humidity
+      state: 'off'
+    - condition: state
+      entity_id: !input door_sensor
+      state: 'off'
+    - condition: state
+      entity_id: !input motion_sensor
+      state: 'on'
+    sequence:  
+    - delay:
+        hours: 0
+        minutes: 0
+        seconds: 10
+        milliseconds: 0    
+    - service: light.turn_on
+      target:
+        entity_id: !input light_entity  
+    - service: switch.turn_on
+      target:
+        entity_id: !input fan_entity        
 #humidity ON + DOOR OPEN + Motion off = Light off
   - conditions:
     - condition: state
