@@ -74,7 +74,7 @@ blueprint:
       description: "The maximum amount of time (in minutes) the fan should run before automatically turning off, regardless of humidity."
       default: 30
 
-  source_url: https://github.com/carlosCastro99/bathBlueprint/blob/main/motion_light_fan_humidity_control.yaml
+  source_url: https://raw.githubusercontent.com/carlosCastro99/bathBlueprint/main/motion_light_fan_humidity_control.yaml
 trigger:
 - platform: state
   entity_id: !input door_sensor
@@ -151,7 +151,10 @@ action:
       target:
         entity_id: !input light_entity    
     - delay:
-        seconds: "{{ states('input_number.delay_timer') | int }}"
+        hours: 0
+        minutes: 0
+        seconds: input_number.delay_timer
+        milliseconds: 0    
     - service: switch.turn_off
       target:
         entity_id: !input fan_entity
@@ -173,10 +176,10 @@ action:
         entity_id: !input light_entity
   default:
   - delay:
-    hours: 0
-    minutes: !input 'max_fan_runtime'
-    seconds: 0
-    milliseconds: 0
+      hours: 0
+      minutes: !input 'max_fan_runtime'
+      seconds: 0
+      milliseconds: 0
   - service: fan.turn_off
     target:
       entity_id: !input fan_entity 
