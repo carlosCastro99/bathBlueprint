@@ -3,7 +3,7 @@ blueprint:
   description: >
     # 🚿 Bathroom Humidity Exhaust Fan
     
-    **Version: 0.1.4**
+    **Version: 0.1.5**
   domain: automation
   input:
     motion_sensor:
@@ -74,20 +74,29 @@ blueprint:
       description: "The maximum amount of time (in minutes) the fan should run before automatically turning off, regardless of humidity."
       default: 30
 
-  source_url: https://github.com/carlosCastro99/bathBlueprint/blob/main/motion_light_fan_humidity_control.yaml
+  source_url: https://gist.github.com/carlosCastro99/b3db939756cfc48f3fceb14fdabc6032
 trigger:
 - platform: state
   entity_id: !input door_sensor
-  to: 'off'
 - platform: state
   entity_id: !input motion_sensor
   from: 'off'
   to: 'on'
+- platform: state
+  entity_id: !input motion_sensor
+  from: 'on'
+  to: 'off'  
 #- platform:  numeric_state
 #  entity_id: !input humidity_sensor
 #  above: input_number.humidity_threshold
 - platform: state
   entity_id: binary_sensor.status_wc_piso1_high_humidity
+  from: 'on'
+  to: 'off'  
+- platform: state
+  entity_id: binary_sensor.status_wc_piso1_high_humidity
+  from: 'off'
+  to: 'on'    
 condition: []
 action:
 - choose:
@@ -153,7 +162,7 @@ action:
     - delay:
         hours: 0
         minutes: 0
-        seconds: input_number.delay_timer
+        seconds: !input delay_timer
         milliseconds: 0    
     - service: switch.turn_off
       target:
